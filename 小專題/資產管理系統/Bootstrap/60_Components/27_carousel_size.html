@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>.carousel</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <script src="../js/bootstrap.bundle.js"></script>
+    <style>
+        .carousel-item img{
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- 10. 將第二張圖片改為顯示 ../image/sunny.jpg，查看畫面效果 -->
+
+        <!-- 20. 該如何做讓圖片正常顯示？ -->
+         <div class="carousel slide" data-bs-ride="carousel" data-bd-interval="3000" id="apple">
+            <div class="carousel-indicators">
+                <button type="button" data-bs-target="#apple" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                <button type="button" data-bs-target="#apple" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                <button type="button" data-bs-target="#apple" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
+            </div>
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <img src="https://dummyimage.com/600x100/00ff5e/ffffff" alt="">
+                </div>
+                <div class="carousel-item">
+                    <img src="../image/sunny.jpg" alt="">
+                </div>
+                <div class="carousel-item">
+                    <img src="https://dummyimage.com/600x100/f057c5/ffffff" alt="">
+                </div>
+
+            </div>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#apple" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+
+    </div>
+
+</body>
+
+</html>

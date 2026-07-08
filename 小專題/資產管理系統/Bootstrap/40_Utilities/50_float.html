@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>float</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <script src="../js/bootstrap.bundle.js"></script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h4>官方網站</h4>
+        <p><a href="https://getbootstrap.com/docs/5.3/utilities/float/">https://getbootstrap.com/docs/5.3/utilities/float/</a></p>
+        <h4>Bootstrap Utilities> 頁面上搜尋 Float and Clearfix</h4>
+        <p><a href="https://www.w3schools.com/bootstrap5/bootstrap_utilities.php">https://www.w3schools.com/bootstrap5/bootstrap_utilities.php</a></p>
+
+        <hr>
+       
+        <!-- 10. 透過 .float-start 和 .float-end 設定元素位置 -->
+
+        <!-- 20. 透過在外層容器加入 .clearfix 清除掉浮動效果 -->
+         <!-- 父元素div class="bg-info"已經沒有內容 -->
+         <div class="bg-info clearfix">
+            <div class="float-start bg-danger p-3">A</div>
+            <div class="float-end bg-success p-3">B</div>
+         </div>
+         
+         <hr>
+         <div class="bg-secondary clearfix">
+            <div class="float-start p-3 bg-warning">C</div>
+            <div class="float-end p-3 bg-primary">D</div>
+         </div>
+         <hr>
+
+    </div>
+
+</body>
+
+</html>

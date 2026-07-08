@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>grid</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <script src="../js/bootstrap.bundle.js"></script>
+    <style>
+        div[class^="col"]:nth-child(odd) {
+            background-color: aqua;
+        }
+
+        div[class^="col"]:nth-child(even) {
+            background-color: rgb(255, 166, 0);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col">col </div>
+        <div class="col">col </div>
+        <div class="col">col </div>
+
+    </div>
+
+    <h4>Bootstrap Grids</h4>
+    <p><a
+            href="https://www.w3schools.com/bootstrap5/bootstrap_grid_basic.php">https://www.w3schools.com/bootstrap5/bootstrap_grid_basic.php</a>
+    </p>
+    <h4>Bootstrap Grid Examples</h4>
+    <p><a
+            href="https://www.w3schools.com/bootstrap5/bootstrap_grid_examples.php">https://www.w3schools.com/bootstrap5/bootstrap_grid_examples.php</a>
+    </p>
+    <h4>Grid options</h4>
+    <p><a
+            href="https://getbootstrap.com/docs/5.3/layout/grid/#grid-options">https://getbootstrap.com/docs/5.3/layout/grid/#grid-options</a>
+    </p>
+
+    <h4>Row columns</h4>
+    <p><a
+            href="https://getbootstrap.com/docs/5.3/layout/grid/#row-columns">https://getbootstrap.com/docs/5.3/layout/grid/#row-columns</a>
+    </p>
+    <h4>Nesting</h4>
+    <p><a
+            href="https://getbootstrap.com/docs/5.3/layout/grid/#nesting">https://getbootstrap.com/docs/5.3/layout/grid/#nesting</a>
+    </p>
+    <hr>
+
+    <!-- 10. 請試著透過 col-* 或者 row-cols-* 的設定，將畫面平分成四欄 -->
+
+    <div class="row">
+        <div class="col-4">1</div>
+        <div class="col-4">2</div>
+        <div class="col-4">3</div>
+        <div class="col-4">4</div>
+    </div>
+
+    <!-- 20. 請試著透過 col-斷點-* 設定當畫面寬度 ≥768px 時，將畫面平分成兩欄 -->
+     <!-- col-md-3:畫面寬度>=768px時，元素會分配3等分 -->
+<div class="row">
+<div class="col-md-6">1</div>
+<div class="col-md-6">2</div>
+
+<div class="row">
+        <div class="col-lg-3">1</div>
+        <div class="col-lg-3">2</div>
+        <div class="col-lg-3">3</div>
+        <div class="col-lg-3">4</div>
+    </div>
+
+
+
+</div>
+
+
+
+<div class="row">
+        <div class="col-3">1</div>
+        <div class="col-3">2</div>
+        <div class="col-3">3</div>
+        <div class="col-3">4</div>
+    </div>
+    <!-- 30. 觀察現有的網頁，進行巢狀堆疊Grid的練習 -->
+
+</body>
+
+</html>
