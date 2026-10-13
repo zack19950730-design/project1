@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流動資金明細</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <script src="../js/bootstrap.bundle.js"></script>
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h1>
+            <div class="row">
+                <div class="col-3">流動資金:</div>
+                <div class="col-3"></div>
+                <div class="col-3" id="totalX">0</div>
+            </div>
+        </h1>
+
+        <div class="row mt-4 mb-4">
+            <div class="col-12">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="addAssetDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        + 新增項目
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="addAssetDropdown">
+                        <li><a class="dropdown-item" href="http://127.0.0.1:5500/cash.html">現金(台幣)</a></li>
+                        <li><a class="dropdown-item" href="#">現金(美金)</a></li>
+                        <li><a class="dropdown-item" href="#">電子支付</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#">+ 自訂全新項目</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">現金(台幣):</div>
+            <div class="col-3"></div>
+            <div class="col-3" id="valueX1">152401</div>
+        </div>
+        <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+            <div class="col-3"></div>
+            <div class="col-3"></div>
+            <div class="col-3">(台幣)</div>
+        </div>
+
+        <div class="row">
+            <div class="col-3">現金(美幣):</div>
+            <div class="col-3"></div>
+            <div class="col-3" id="valueX2">2532</div>
+        </div>
+        <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+            <div class="col-3"></div>
+            <div class="col-3"></div>
+            <div class="col-3">(台幣)</div>
+        </div>
+    </div>
+
+    <script>
+        // 建立一個計算總和的函式
+        function calculateTotal() {
+            // 1. 抓取 X1 和 X2 的文字內容，並轉換成整數數字 (數字轉換失敗時預設為 0)
+            const x1 = parseInt(document.getElementById('valueX1').innerText) || 0;
+            const x2 = parseInt(document.getElementById('valueX2').innerText) || 0;
+
+            // 2. 相加
+            const total = x1 + x2;
+
+            // 3. 將總和轉成有千分位逗號的格式 (例如：109474 -> 109,474)
+            document.getElementById('totalX').innerText = total.toLocaleString();
+
+            // 4. (選做) 順便把 X1 和 X2 畫面上也加上千分位逗號，看起來更專業
+            document.getElementById('valueX1').innerText = x1.toLocaleString();
+            document.getElementById('valueX2').innerText = x2.toLocaleString();
+        }
+
+        // 當網頁全部載入完成後，自動執行計算
+        window.onload = calculateTotal;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資產計算器主頁</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <script src="../js/bootstrap.bundle.js"></script>
+</head>
+<body>
+<div class="container mt-4">
+    
+    <h1 class="display-5 fw-bold mb-4">
+        <div class="row align-items-center">
+            <div class="col-3">淨資產:</div>
+            <div class="col-3"></div>
+            <div class="col-5 text-success" id="netWorth">0</div>
+        </div>
+    </h1>
+    
+    <hr class="my-4">
+
+    <div class="row fs-4 my-3 align-items-center">
+        <div class="col-3">
+            <a href="http://127.0.0.1:5500/%E5%B0%8F%E5%B0%88%E9%A1%8C/%E8%B3%87%E7%94%A2%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1/Bootstrap/cashtest.html" class="text-decoration-none text-primary fw-semibold">流動資金:</a>
+        </div>
+        <div class="col-3 text-muted fs-6">(台幣、美金)</div>
+        <div class="col-3 fw-bold text-end" id="cashAmount">0</div>
+        <div class="col-3 text-muted fs-6">(台幣)</div>
+    </div>
+
+    <div class="row fs-4 my-3 align-items-center">
+        <div class="col-3">
+            <a href="http://127.0.0.1:5500/%E5%B0%8F%E5%B0%88%E9%A1%8C/%E8%B3%87%E7%94%A2%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1/Bootstrap/stocktest.html" class="text-decoration-none text-primary fw-semibold">投資:</a>
+        </div>
+        <div class="col-3 text-muted fs-6">(台股、美股)</div>
+        <div class="col-3 fw-bold text-end" id="investmentAmount">0</div>
+        <div class="col-3 text-muted fs-6">(台幣)</div>
+    </div>
+
+    <div class="row fs-4 my-3 align-items-center">
+        <div class="col-3 class="fw-semibold"">固定資產:</div>
+        <div class="col-3 text-muted fs-6">(房產、汽車)</div>
+        <div class="col-3 fw-bold text-end" id="fixedAssetAmount">109,474</div>
+        <div class="col-3 text-muted fs-6">(台幣)</div>
+    </div>
+
+</div>
+
+<script>
+// 建立一個從「共用筆記本」讀取資料並計算的函式
+function calculateNetWorth() {
+    // 【步驟一：讀取資料】從 localStorage 拿出分頁存進去的數字
+    const cash = parseFloat(localStorage.getItem('totalCash')) || 0;
+    
+    // ─── 💡 這裡修改：讀取你從 A 網頁存入的 dailyInvestment ───
+    let investment = 0;
+    const savedDataString = localStorage.getItem("dailyInvestment");
+    if (savedDataString) {
+        const savedData = JSON.parse(savedDataString);
+        investment = parseFloat(savedData.amount) || 0; // 成功取出 A 網頁的數字（例如：17281852）
+    }
+    // ───────────────────────────────────────────────────────
+    
+    // 讀取固定資產畫面上的字串，並把千分位逗號去掉轉回純數字
+    const fixedAssetRaw = document.getElementById('fixedAssetAmount').innerText.replace(/,/g, '');
+    const fixedAsset = parseFloat(fixedAssetRaw) || 0;
+
+    // 【步驟二：填入分項空格】渲染流動資金與投資金額，並加上專業的千分位逗號
+    document.getElementById('cashAmount').innerText = Math.round(cash).toLocaleString();
+    document.getElementById('investmentAmount').innerText = Math.round(investment).toLocaleString(); // 👈 這裡就會顯示 A 網頁的值了！
+
+    // 【步驟三：最終加總】將三者相加，並渲染到最上方的「淨資產」欄位
+    const totalNetWorth = cash + investment + fixedAsset;
+    document.getElementById('netWorth').innerText = Math.round(totalNetWorth).toLocaleString();
+}
+
+// 當主網頁載入完成時，立刻執行一次計算
+window.addEventListener('DOMContentLoaded', calculateNetWorth);
+
+// 【進階優化功能】：監聽瀏覽器儲存空間變化
+// 當您開著主頁，同時在別的分頁（如股票頁A）重新整理獲取新股價時，主頁會「完全免整理」即時跳動更新！
+window.addEventListener('storage', calculateNetWorth);
+// 建立一個從「共用筆記本 (localStorage)」讀取資料並計算的函式
+function calculateNetWorth() {
+    // 【步驟一：讀取流動資金】
+    const cash = parseFloat(localStorage.getItem('totalCash')) || 0;
+    
+    // 【步驟二：讀取投資金額 (來自 stocktest.html)】
+    let investment = 0;
+    try {
+        const savedDataString = localStorage.getItem("dailyInvestment");
+        if (savedDataString) {
+            const savedData = JSON.parse(savedDataString);
+            // 確保有抓到 amount，沒有的話給 0
+            investment = parseFloat(savedData.amount) || 0; 
+        }
+    } catch (e) {
+        console.error("解析投資資料失敗，可能格式不正確：", e);
+        investment = 0;
+    }
+    
+    // 【步驟三：讀取固定資產】並去掉千分位逗號
+    const fixedAssetRaw = document.getElementById('fixedAssetAmount').innerText.replace(/,/g, '');
+    const fixedAsset = parseFloat(fixedAssetRaw) || 0;
+
+    // 【步驟四：將數值渲染到畫面分項】
+    document.getElementById('cashAmount').innerText = Math.round(cash).toLocaleString();
+    document.getElementById('investmentAmount').innerText = Math.round(investment).toLocaleString();
+
+    // 【步驟五：最終加總淨資產】
+    const totalNetWorth = cash + investment + fixedAsset;
+    document.getElementById('netWorth').innerText = Math.round(totalNetWorth).toLocaleString();
+}
+
+// 當主網頁載入完成時，立刻執行一次計算
+window.addEventListener('DOMContentLoaded', calculateNetWorth);
+
+// 監聽其他分頁的儲存空間變化，達成免重新整理即時更新
+window.addEventListener('storage', function(e) {
+    // 只有當相關的資料 Key 改變時才重新計算，提升瀏覽器效能
+    if (e.key === 'totalCash' || e.key === 'dailyInvestment') {
+        calculateNetWorth();
+    }
+});
+function calculateNetWorth() {
+    // 1. 讀取流動資金
+    const cash = parseFloat(localStorage.getItem('totalCash')) || 0;
+    
+    // 2. 讀取投資金額（相容多種 Key 格式，防呆機制）
+    let investment = 0;
+    
+    // 嘗試從 dailyInvestment 讀取 (JSON 格式)
+    const savedDataString = localStorage.getItem("dailyInvestment");
+    if (savedDataString) {
+        try {
+            const savedData = JSON.parse(savedDataString);
+            investment = parseFloat(savedData.amount) || 0;
+        } catch (e) {
+            // 如果 dailyInvestment 不是 JSON 格式，直接當作純數字解析
+            investment = parseFloat(savedDataString) || 0;
+        }
+    }
+    
+    // 如果上面沒讀到，嘗試讀取常見的備用 Key 名稱
+    if (investment === 0) {
+        investment = parseFloat(localStorage.getItem('totalInvestment')) || 0;
+    }
+    
+    // 3. 讀取固定資產
+    const fixedAssetRaw = document.getElementById('fixedAssetAmount').innerText.replace(/,/g, '');
+    const fixedAsset = parseFloat(fixedAssetRaw) || 0;
+
+    // 4. 渲染到畫面上
+    document.getElementById('cashAmount').innerText = Math.round(cash).toLocaleString();
+    document.getElementById('investmentAmount').innerText = Math.round(investment).toLocaleString();
+
+    // 5. 最終加總淨資產
+    const totalNetWorth = cash + investment + fixedAsset;
+    document.getElementById('netWorth').innerText = Math.round(totalNetWorth).toLocaleString();
+}
+
+window.addEventListener('DOMContentLoaded', calculateNetWorth);
+window.addEventListener('storage', calculateNetWorth);
+</script>
+</body>
+</html>
