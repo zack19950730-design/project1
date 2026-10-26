@@ -1,5 +1,6 @@
 package com.assetsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,6 +22,11 @@ public class StockHolding {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** 擁有者，只在新增時設定；不回傳給前端 */
+    @JsonIgnore
+    @Column(name = "member_id", nullable = false, updatable = false)
+    private Long memberId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Market market;
@@ -39,6 +45,9 @@ public class StockHolding {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getMemberId() { return memberId; }
+    public void setMemberId(Long memberId) { this.memberId = memberId; }
 
     public Market getMarket() { return market; }
     public void setMarket(Market market) { this.market = market; }

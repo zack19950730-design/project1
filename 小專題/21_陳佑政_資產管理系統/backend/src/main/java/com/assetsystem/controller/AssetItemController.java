@@ -1,5 +1,6 @@
 package com.assetsystem.controller;
 
+import com.assetsystem.config.AuthInterceptor;
 import com.assetsystem.dto.AssetItemRequest;
 import com.assetsystem.entity.AssetCategory;
 import com.assetsystem.entity.AssetItem;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -32,24 +34,27 @@ public class AssetItemController {
 
     /** GET /api/assets?category=CASH，不帶 category 回傳全部 */
     @GetMapping
-    public List<AssetItem> list(@RequestParam(required = false) AssetCategory category) {
-        return category == null ? service.findAll() : service.findByCategory(category);
+    public List<AssetItem> list(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId,
+                                @RequestParam(required = false) AssetCategory category) {
+        return category == null ? service.findAll(memberId) : service.findByCategory(memberId, category);
     }
 
     /** POST /api/assets：同類別同名稱則更新金額，否則新增 */
     @PostMapping
-    public AssetItem upsert(@Valid @RequestBody AssetItemRequest request) {
-        return service.upsert(request);
+    public AssetItem upsert(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId,
+                            @Valid @RequestBody AssetItemRequest request) {
+        return service.upsert(memberId, request);
     }
 
     @PutMapping("/{id}")
-    public AssetItem update(@PathVariable Long id, @Valid @RequestBody AssetItemRequest request) {
-        return service.update(id, request);
+    public AssetItem update(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId, @PathVariable Long id,
+                            @Valid @RequestBody AssetItemRequest request) {
+        return service.update(memberId, id, request);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        service.delete(id);
+    public void delete(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId, @PathVariable Long id) {
+        service.delete(memberId, id);
     }
 }

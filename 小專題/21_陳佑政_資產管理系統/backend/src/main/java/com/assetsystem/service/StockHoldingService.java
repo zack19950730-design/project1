@@ -30,19 +30,20 @@ public class StockHoldingService {
     }
 
     /** 列出某市場持股並附上即時股價 */
-    public List<StockHoldingResponse> findByMarketWithPrice(Market market) {
-        return repository.findByMarketOrderByIdAsc(market).stream()
+    public List<StockHoldingResponse> findByMarketWithPrice(Long memberId, Market market) {
+        return repository.findByMemberIdAndMarketOrderByIdAsc(memberId, market).stream()
                 .map(this::withPrice)
                 .toList();
     }
 
     /** 同市場同代號已存在就更新股數，否則新增 (與原本 addStock 的行為相同) */
     @Transactional
-    public StockHoldingResponse upsert(StockHoldingRequest request) {
+    public StockHoldingResponse upsert(Long memberId, StockHoldingRequest request) {
         String code = request.code().trim().toUpperCase();
-        StockHolding holding = repository.findByMarketAndCode(request.market(), code)
+        StockHolding holding = repository.findByMemberIdAndMarketAndCode(memberId, request.market(), code)
                 .orElseGet(() -> {
                     StockHolding created = new StockHolding();
+                    created.setMemberId(memberId);
                     created.setMarket(request.market());
                     created.setCode(code);
                     return created;
@@ -52,16 +53,15 @@ public class StockHoldingService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new NotFoundException("找不到持股 id=" + id);
-        }
-        repository.deleteById(id);
+    public void delete(Long memberId, Long id) {
+        StockHolding holding = repository.findByIdAndMemberId(id, memberId)
+                .orElseThrow(() -> new NotFoundException("找不到持股 id=" + id));
+        repository.delete(holding);
     }
 
     /** 投資總額 (台幣)，抓不到股價的持股不計入 */
-    public BigDecimal totalTwd() {
-        return repository.findAll().stream()
+    public BigDecimal totalTwd(Long memberId) {
+        return repository.findByMemberId(memberId).stream()
                 .map(this::withPrice)
                 .map(StockHoldingResponse::amountTwd)
                 .filter(Objects::nonNull)

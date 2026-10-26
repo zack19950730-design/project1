@@ -22,11 +22,11 @@ public class SummaryService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    public SummaryResponse getSummary() {
-        BigDecimal cash = assetItemService.totalTwd(AssetCategory.CASH);
-        BigDecimal fixed = assetItemService.totalTwd(AssetCategory.FIXED);
-        BigDecimal liability = assetItemService.totalTwd(AssetCategory.LIABILITY);
-        BigDecimal investment = stockHoldingService.totalTwd();
+    public SummaryResponse getSummary(Long memberId) {
+        BigDecimal cash = assetItemService.totalTwd(memberId, AssetCategory.CASH);
+        BigDecimal fixed = assetItemService.totalTwd(memberId, AssetCategory.FIXED);
+        BigDecimal liability = assetItemService.totalTwd(memberId, AssetCategory.LIABILITY);
+        BigDecimal investment = stockHoldingService.totalTwd(memberId);
         BigDecimal netWorth = cash.add(investment).add(fixed).subtract(liability);
         return new SummaryResponse(cash, investment, fixed, liability, netWorth, exchangeRateService.getUsdRate());
     }

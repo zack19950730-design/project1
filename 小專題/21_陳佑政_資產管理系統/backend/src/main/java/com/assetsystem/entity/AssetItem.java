@@ -1,5 +1,6 @@
 package com.assetsystem.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -20,6 +21,11 @@ public class AssetItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /** 擁有者，只在新增時設定；不回傳給前端 */
+    @JsonIgnore
+    @Column(name = "member_id", nullable = false, updatable = false)
+    private Long memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -43,6 +49,9 @@ public class AssetItem {
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
+    public Long getMemberId() { return memberId; }
+    public void setMemberId(Long memberId) { this.memberId = memberId; }
 
     public AssetCategory getCategory() { return category; }
     public void setCategory(AssetCategory category) { this.category = category; }

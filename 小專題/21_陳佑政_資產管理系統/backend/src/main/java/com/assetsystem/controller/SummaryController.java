@@ -1,8 +1,10 @@
 package com.assetsystem.controller;
 
+import com.assetsystem.config.AuthInterceptor;
 import com.assetsystem.dto.SummaryResponse;
 import com.assetsystem.service.SummaryService;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,7 +20,7 @@ public class SummaryController {
     }
 
     @GetMapping
-    public SummaryResponse get() {
-        return service.getSummary();
+    public SummaryResponse get(@RequestAttribute(AuthInterceptor.MEMBER_ID) Long memberId) {
+        return service.getSummary(memberId);
     }
 }

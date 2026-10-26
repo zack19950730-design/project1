@@ -23,23 +23,24 @@ public class AssetItemService {
         this.exchangeRateService = exchangeRateService;
     }
 
-    public List<AssetItem> findAll() {
-        return repository.findAll();
+    public List<AssetItem> findAll(Long memberId) {
+        return repository.findByMemberIdOrderByIdAsc(memberId);
     }
 
-    public List<AssetItem> findByCategory(AssetCategory category) {
-        return repository.findByCategoryOrderByIdAsc(category);
+    public List<AssetItem> findByCategory(Long memberId, AssetCategory category) {
+        return repository.findByMemberIdAndCategoryOrderByIdAsc(memberId, category);
     }
 
     /**
      * 同類別同名稱已存在就更新金額，否則新增 (與原本 handleAsset 的行為相同)
      */
     @Transactional
-    public AssetItem upsert(AssetItemRequest request) {
+    public AssetItem upsert(Long memberId, AssetItemRequest request) {
         String name = request.name().trim();
-        AssetItem item = repository.findByCategoryAndName(request.category(), name)
+        AssetItem item = repository.findByMemberIdAndCategoryAndName(memberId, request.category(), name)
                 .orElseGet(() -> {
                     AssetItem created = new AssetItem();
+                    created.setMemberId(memberId);
                     created.setCategory(request.category());
                     created.setName(name);
                     created.setCurrency(guessCurrency(name));
@@ -53,8 +54,8 @@ public class AssetItemService {
     }
 
     @Transactional
-    public AssetItem update(Long id, AssetItemRequest request) {
-        AssetItem item = repository.findById(id)
+    public AssetItem update(Long memberId, Long id, AssetItemRequest request) {
+        AssetItem item = repository.findByIdAndMemberId(id, memberId)
                 .orElseThrow(() -> new NotFoundException("找不到資產項目 id=" + id));
         item.setCategory(request.category());
         item.setName(request.name().trim());
@@ -66,16 +67,15 @@ public class AssetItemService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new NotFoundException("找不到資產項目 id=" + id);
-        }
-        repository.deleteById(id);
+    public void delete(Long memberId, Long id) {
+        AssetItem item = repository.findByIdAndMemberId(id, memberId)
+                .orElseThrow(() -> new NotFoundException("找不到資產項目 id=" + id));
+        repository.delete(item);
     }
 
     /** 計算某類別的台幣小計 (美金乘匯率) */
-    public BigDecimal totalTwd(AssetCategory category) {
-        return findByCategory(category).stream()
+    public BigDecimal totalTwd(Long memberId, AssetCategory category) {
+        return findByCategory(memberId, category).stream()
                 .map(item -> exchangeRateService.toTwd(item.getAmount(), item.getCurrency()))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
