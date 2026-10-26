@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流動資金明細</title>
+    <link rel="stylesheet" href="../css/bootstrap.css">
+    <!-- 引入 Bootstrap CSS（如果本機沒有，也可以暫時改用 CDN 測試） -->
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"> -->
+    <script src="../js/bootstrap.bundle.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h1>
+            <div class="row">
+                <div class="col-4">流動資金:</div>
+                <div class="col-4"></div>
+                <!-- 初始總和會由 JS 自動計算覆蓋，這裡放 0 即可 -->
+                <div class="col-4" id="totalX">0</div> 
+            </div>
+        </h1>
+
+        <div class="row mt-4 mb-4">
+            <div class="col-12">
+                <div class="dropdown">
+                    <button class="btn btn-primary dropdown-toggle" type="button" id="addAssetDropdown"
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                        + 新增項目
+                    </button>
+                    <!-- 修正：將 '現金(美幣)' 統一改成 '現金(美金)' -->
+                    <ul class="dropdown-menu" aria-labelledby="addAssetDropdown">
+                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('現金(台幣)')">現金(台幣)</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('現金(美金)')">現金(美金)</a></li>
+                        <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('電子支付')">電子支付</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="handleAssetCustom()">+ 自訂全新項目</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 將清單包在一個 container 裡面，方便我們動態插入新項目 -->
+        <div id="asset-list-container">
+            <!-- 現金(台幣) - 修正：補上 data-currency="TWD" -->
+            <div class="asset-item" data-name="現金(台幣)" data-currency="TWD">
+                <div class="row">
+                    <div class="col-4 font-label">現金(台幣):</div>
+                    <div class="col-4"></div>
+                    <div class="col-4 value-field" id="valueX1">152401</div>
+                </div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+                    <div class="col-4"></div>
+                    <div class="col-4"></div>
+                    <div class="col-4">(台幣)</div>
+                </div>
+            </div>
+
+            <!-- 現金(美金) - 修正：補上 data-currency="USD"，名稱與選單一致 -->
+            <div class="asset-item" data-name="現金(美金)" data-currency="USD">
+                <div class="row">
+                    <div class="col-4 font-label">現金(美金):</div>
+                    <div class="col-4"></div>
+                    <div class="col-4 value-field" id="valueX2">2532</div>
+                </div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+                    <div class="col-4"></div>
+                    <div class="col-4"></div>
+                    <div class="col-4">(美金)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 3. JavaScript 邏輯控制 (修正：改用 JS 的雙斜線註解，避免語法錯誤)
+        
+        // 統一處理資產 新增/修改 的函數
+        function handleAsset(itemName) {
+            // 跳出輸入視窗
+            let inputAmount = prompt(`請輸入「${itemName}」的金額：`);
+            
+            // 如果使用者按了「取消」或沒輸入任何東西就關閉
+            if (inputAmount === null || inputAmount.trim() === "") {
+                return;
+            }
+
+            // 轉成整數（若輸入無效字元則給 0）
+            let amount = parseInt(inputAmount) || 0;
+
+            // 檢查畫面上是否已經有這個項目
+            let existingItem = document.querySelector(`.asset-item[data-name="${itemName}"]`);
+
+            if (existingItem) {
+                // 【修改項目】：如果有，就更新金額
+                let valueField = existingItem.querySelector('.value-field');
+                valueField.innerText = amount;
+            } else {
+                // 【新增項目】：如果沒有，就用 innerHTML 動態寫入新的一行
+                let container = document.getElementById('asset-list-container');
+                let newId = 'valueX_' + Date.now();
+
+                // 判斷新增的是不是美金項目（用 itemName 是否包含 '美金' 或 '美幣' 來判斷）
+                let isUSD = itemName.includes("美金") || itemName.includes("美幣");
+                let currencyAttr = isUSD ? 'USD' : 'TWD';
+                let currencyLabel = isUSD ? '(美金)' : '(台幣)';
+
+                let newItemHTML = `
+                    <div class="asset-item" data-name="${itemName}" data-currency="${currencyAttr}">
+                        <div class="row">
+                            <div class="col-4 font-label">${itemName}:</div>
+                            <div class="col-4"></div>
+                            <div class="col-4 value-field" id="${newId}">${amount}</div>
+                        </div>
+                        <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+                            <div class="col-4"></div>
+                            <div class="col-4"></div>
+                            <div class="col-4">${currencyLabel}</div>
+                        </div>
+                    </div>
+                `;
+                // 將新項目追加到容器的最後面
+                container.insertAdjacentHTML('beforeend', newItemHTML);
+            }
+
+            // 每次新增/修改完後，重新計算總流動資金
+            calculateTotal();
+        }
+
+        // 處理「自訂全新項目」的點擊
+        function handleAssetCustom() {
+            let customName = prompt("請輸入自訂項目的名稱（例如：日幣）：");
+            if (customName && customName.trim() !== "") {
+                handleAsset(customName.trim());
+            }
+        }
+
+        // 統整後的計算與千分位格式化函數
+        function calculateTotal() {
+            let total = 0;
+            
+            // 1. 抓取畫面上所有 class 為 value-field 的元素
+            let valueFields = document.querySelectorAll('.value-field');
+            
+            valueFields.forEach(function(element) {
+                // 先用 replace(/,/g, '') 把原本可能存在的千分位逗號去掉，再轉整數
+                let rawText = element.innerText.replace(/,/g, '');
+                let val = parseInt(rawText) || 0;
+                
+                // 向上尋找這個欄位所屬的 .asset-item 父元素
+                let parentItem = element.closest('.asset-item');
+                
+                // 讀取該項目的幣別屬性
+                let currency = parentItem ? parentItem.getAttribute('data-currency') : 'TWD';
+                
+                // 判斷是不是美金項目（或是 data-name 包含美金/美幣）
+                let isUSD = currency === 'USD' || (parentItem && (parentItem.getAttribute('data-name').includes('美金') || parentItem.getAttribute('data-name').includes('美幣')));
+
+                if (isUSD) {
+                    // 如果是美金，計算時乘上 31 匯率
+                    total += (val * 31);
+                } else {
+                    // 台幣項目，直接加總
+                    total += val;
+                }
+                
+                // 順便把該欄位更新成有逗號的漂亮格式
+                element.innerText = val.toLocaleString();
+            });
+
+            // 2. 更新總流動資金的顯示，同樣加上千分位逗號
+            document.getElementById('totalX').innerText = total.toLocaleString();
+        }
+
+        // 當網頁全部載入完成後，自動執行第一次計算
+        window.onload = calculateTotal;
+    </script>
+</body>
+
+</html>

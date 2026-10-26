@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <title>個人投資看板 (真實即時股價版)</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-4">
+  <h2>投資總額 (台幣): <span id="totalInvestment" class="text-primary fw-bold">連線中...</span></h2>
+  
+  <!-- 操作按鈕區 -->
+  <div class="row mt-4 mb-3">
+    <div class="col-12">
+      <button class="btn btn-success me-2" onclick="addStock('TW')">+ 新增台股項目</button>
+      <button class="btn btn-primary" onclick="addStock('US')">+ 新增美股項目</button>
+    </div>
+  </div>
+
+  <h4 class="mt-4">台股資產</h4>
+  <table class="table mt-2">
+    <thead class="table-dark">
+      <tr>
+        <th>台股 (代號)</th>
+        <th>股數</th>
+        <th>現價 (元/股)</th>
+        <th>總金額 (台幣)</th>
+      </tr>
+    </thead>
+    <tbody id="twStockBody">
+      <tr data-code="2330" data-shares="200">
+        <td>2330</td>
+        <td>200</td>
+        <td class="price">讀取中...</td>
+        <td class="amount">-</td>
+      </tr>
+      <tr data-code="2308" data-shares="300">
+        <td>2308</td>
+        <td>300</td>
+        <td class="price">讀取中...</td>
+        <td class="amount">-</td>
+      </tr>
+      <tr data-code="3037" data-shares="500">
+        <td>3037</td>
+        <td>500</td>
+        <td class="price">讀取中...</td>
+        <td class="amount">-</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h4 class="mt-4">美股資產 (匯率: 1 USD = 31 TWD)</h4>
+  <table class="table mt-2">
+    <thead class="table-dark">
+      <tr>
+        <th>美股 (代號)</th>
+        <th>股數</th>
+        <th>現價 (元/股)</th>
+        <th>總金額 (美金)</th>
+      </tr>
+    </thead>
+    <tbody id="usStockBody">
+      <tr data-code="INTC" data-shares="229">
+        <td>INTC</td>
+        <td>229</td>
+        <td class="price">讀取中...</td>
+        <td class="amount">-</td>
+      </tr>
+      <tr data-code="PLTR" data-shares="58">
+        <td>PLTR</td>
+        <td>58</td>
+        <td class="price">讀取中...</td>
+        <td class="amount">-</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  const USD_RATE = 31; // 美金匯率
+
+  // 新增股票項目的主要函數
+  function addStock(type) {
+    const typeName = type === 'TW' ? '台股' : '美股';
+    
+    let code = prompt(`請輸入${typeName}代號 (例如: ${type === 'TW' ? '2454' : 'AAPL'}):`);
+    if (code === null || code.trim() === "") return;
+    code = code.trim().toUpperCase();
+
+    let sharesInput = prompt(`請輸入「${code}」的持股股數:`);
+    if (sharesInput === null || sharesInput.trim() === "") return;
+    let shares = parseInt(sharesInput) || 0;
+
+    const tbodyId = type === 'TW' ? 'twStockBody' : 'usStockBody';
+    const tbody = document.getElementById(tbodyId);
+
+    let existingRow = tbody.querySelector(`tr[data-code="${code}"]`);
+
+    if (existingRow) {
+        existingRow.setAttribute('data-shares', shares);
+        existingRow.querySelector('td:nth-child(2)').innerText = shares.toLocaleString();
+    } else {
+        const newRowHTML = `
+          <tr data-code="${code}" data-shares="${shares}">
+            <td>${code}</td>
+            <td>${shares}</td>
+            <td class="price">讀取中...</td>
+            <td class="amount">-</td>
+          </tr>
+        `;
+        tbody.insertAdjacentHTML('beforeend', newRowHTML);
+    }
+
+    // 新增完畢後，立刻啟動 API 抓取最新股價
+    fetchAllStockPrices();
+  }
+
+  // 核心：透過 Yahoo Finance API 抓取真實、最新的現價
+  async function fetchStockPriceFromAPI(code, isTW) {
+    // 整理 Yahoo 財經的代號格式 (台股要加上 .TW，美股不用)
+    const symbol = isTW ? `${code}.TW` : code;
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      // 解析 Yahoo API 回傳的最新價格
+      const meta = data.chart.result[0].meta;
+      const currentPrice = meta.regularMarketPrice; // 取得最新收盤價/現價
+      return currentPrice;
+    } catch (error) {
+      console.error(`抓取代號 ${symbol} 失敗:`, error);
+      return null;
+    }
+  }
+
+  // 批次掃描畫面上的股票，並更新所有現價
+  async function fetchAllStockPrices() {
+    // 1. 抓取所有台股
+    const twRows = document.querySelectorAll('#twStockBody tr');
+    for (let row of twRows) {
+      const code = row.getAttribute('data-code');
+      const priceElement = row.querySelector('.price');
+      
+      // 避免重複請求已經讀取成功的價格（除非你想做「重新整理」按鈕）
+      if (priceElement.innerText === "讀取中..." || priceElement.innerText === "-") {
+        const realPrice = await fetchStockPriceFromAPI(code, true);
+        if (realPrice !== null) {
+          priceElement.innerText = realPrice;
+        } else {
+          priceElement.innerText = "讀取失敗";
+        }
+      }
+    }
+
+    // 2. 抓取所有美股
+    const usRows = document.querySelectorAll('#usStockBody tr');
+    for (let row of usRows) {
+      const code = row.getAttribute('data-code');
+      const priceElement = row.querySelector('.price');
+
+      if (priceElement.innerText === "讀取中..." || priceElement.innerText === "-") {
+        const realPrice = await fetchStockPriceFromAPI(code, false);
+        if (realPrice !== null) {
+          priceElement.innerText = realPrice;
+        } else {
+          priceElement.innerText = "讀取失敗";
+        }
+      }
+    }
+
+    // 3. 所有現價都寫入 HTML 後，執行加總與千分位格式化
+    calculateTotalInvestments();
+  }
+
+  // 統一計算總金額
+  function calculateTotalInvestments() {
+    let totalTWD = 0;
+
+    // 計算台股
+    const twRows = document.querySelectorAll('#twStockBody tr');
+    twRows.forEach(row => {
+        const shares = parseInt(row.getAttribute('data-shares')) || 0;
+        const priceElement = row.querySelector('.price');
+        const priceText = priceElement.innerText.replace(/,/g, '').trim();
+
+        if (priceText === "讀取中..." || priceText === "讀取失敗" || priceText === "-" || priceText === "") {
+            row.querySelector('.amount').innerText = "-";
+            return;
+        }
+
+        const price = parseFloat(priceText) || 0;
+        const amount = shares * price;
+        totalTWD += amount;
+
+        row.querySelector('.amount').innerText = amount.toLocaleString();
+        priceElement.innerText = price.toLocaleString();
+    });
+
+    // 計算美股
+    const usRows = document.querySelectorAll('#usStockBody tr');
+    usRows.forEach(row => {
+        const shares = parseInt(row.getAttribute('data-shares')) || 0;
+        const priceElement = row.querySelector('.price');
+        const priceText = priceElement.innerText.replace(/,/g, '').trim();
+
+        if (priceText === "讀取中..." || priceText === "讀取失敗" || priceText === "-" || priceText === "") {
+            row.querySelector('.amount').innerText = "-";
+            return;
+        }
+
+        const price = parseFloat(priceText) || 0;
+        const amountUSD = shares * price;
+        const amountTWD = amountUSD * USD_RATE;
+        totalTWD += amountTWD;
+
+        row.querySelector('.amount').innerText = amountUSD.toLocaleString();
+        priceElement.innerText = price.toLocaleString();
+    });
+
+    // 更新總投資額
+    document.getElementById('totalInvestment').innerText = '$ ' + totalTWD.toLocaleString();
+  }
+
+  // 網頁開啟時，自動去撈取所有股票的真實價格
+  window.onload = function() {
+    fetchAllStockPrices();
+  };
+  const stockData = {
+    amount: totalTWD,          // 你的台幣總投資額
+    lastUpdated: Date.now()    // 記錄更新時間
+};
+
+// 將資料轉成 JSON 字串存入 localStorage
+localStorage.setItem("dailyInvestment", JSON.stringify(stockData));
+
+</script>
+</body>
+</html>

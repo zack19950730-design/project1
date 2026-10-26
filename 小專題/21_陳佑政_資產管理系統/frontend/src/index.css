@@ -1,0 +1,24 @@
+body {
+    font-family: sans-serif;
+    color: rgb(0, 0, 0);
+}
+
+/* 每頁的背景圖由 .page 的 style 指定 */
+.page {
+    min-height: 100vh;
+    padding-top: 1.5rem;
+    padding-bottom: 1rem;
+    background-repeat: repeat;
+    background-size: 20%;
+    background-attachment: fixed;
+}
+
+.section-container {
+    background: rgba(255, 255, 255, 0.95);
+    position: relative;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
+    z-index: 1;
+}

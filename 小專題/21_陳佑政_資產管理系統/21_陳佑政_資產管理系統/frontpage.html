@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>給我錢資產管理系統</title>
+    <!-- 引入 Bootstrap CSS 與 JS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body{
+        background-image: url(./image/cat3.jpg);
+        background-repeat: repeat;
+        background-size: 20%;
+        font-family: sans-serif;
+        background-attachment: fixed;
+        color: rgb(0, 0, 0);
+        
+    
+    }
+   
+
+        .section-container { background: rgba(255, 255, 255, 0.95); 
+  
+  position: relative;
+  padding: 20px; 
+  border-radius: 10px; 
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+  margin-bottom: 30px; 
+  z-index: 1;}
+    
+    </style>
+</head>
+<body>
+
+    <!-- ========================================== -->
+    <!-- 區塊 1：總資產看板 (淨資產計算核心) -->
+    <!-- ========================================== -->
+    <div class="container mt-4 section-container">
+        <h1 class="display-5 fw-bold mb-4">
+            <div class="row align-items-center">
+                <div class="col-3">淨資產:</div>
+                <div class="col-3"></div>
+                <!-- 預設為綠色(text-success)，若為負債會由 JS 自動轉為紅色(text-danger) -->
+                <div class="col-5 text-success" id="netWorth">0</div>
+            </div>
+        </h1>
+        
+        <hr class="my-4">
+
+        <div class="row fs-4 my-3 align-items-center">
+            <div class="col-3 fw-semibold text-primary">流動資金:</div>
+            <div class="col-3 text-muted fs-6">(台幣、美金)</div>
+            <div class="col-3 fw-bold text-end" id="cashAmount">0</div>
+            <div class="col-3 text-muted fs-6">(台幣)</div>
+        </div>
+
+        <div class="row fs-4 my-3 align-items-center">
+            <div class="col-3 fw-semibold text-primary">投資:</div>
+            <div class="col-3 text-muted fs-6">(台股、美股)</div>
+            <div class="col-3 fw-bold text-end" id="investmentAmount">0</div>
+            <div class="col-3 text-muted fs-6">(台幣)</div>
+        </div>
+
+        <div class="row fs-4 my-3 align-items-center">
+            <div class="col-3 fw-semibold text-primary">固定資產:</div>
+            <div class="col-3 text-muted fs-6">(房產、汽車)</div>
+            <div class="col-3 fw-bold text-end" id="fixedAssetAmount">0</div>
+            <div class="col-3 text-muted fs-6">(台幣)</div>
+        </div>
+
+        <div class="row fs-4 my-3 align-items-center">
+            <div class="col-3 fw-semibold text-danger">負債:</div>
+            <div class="col-3 text-muted fs-6">(貸款、信用卡)</div>
+            <div class="col-3 fw-bold text-end text-danger" id="liabilityAmount">0</div>
+            <div class="col-3 text-muted fs-6">(台幣)</div>
+        </div>
+    </div>
+    
+    <!-- ========================================== -->
+    <!-- 區塊 2：流動資金明細 -->
+    <!-- ========================================== -->
+    <div class="container section-container">
+        <h2 class="mb-4">流動資金小計: <span class="text-primary" id="cashTotalDisplay">0</span></h2>
+        <div class="dropdown mb-4">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">+ 新增流動資金</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('cash', '現金(台幣)')">現金(台幣)</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('cash', '現金(美金)')">現金(美金)</a></li>
+                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="handleAssetCustom('cash')">+ 自訂項目</a></li>
+            </ul>
+        </div>
+        <div id="cash-list-container">
+            <div class="asset-item" data-name="現金(台幣)" data-currency="TWD">
+                <div class="row"><div class="col-4">現金(台幣):</div><div class="col-4"></div><div class="col-4 value-field">152401</div></div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;"><div class="col-8"></div><div class="col-4">(台幣)</div></div>
+            </div>
+            <div class="asset-item" data-name="現金(美金)" data-currency="USD">
+                <div class="row"><div class="col-4">現金(美金):</div><div class="col-4"></div><div class="col-4 value-field">2532</div></div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;"><div class="col-8"></div><div class="col-4">(美金)</div></div>
+            </div>
+        </div>
+    </div>
+     <!-- ========================================== -->
+    <!-- 區塊 3：投資看板 -->
+    <!-- ========================================== -->
+    <div class="container section-container mb-5">
+        <h2>投資總額 (台幣): <span id="totalInvestment" class="text-primary fw-bold">連線中...</span><button style="margin-left: 40%;"><a href="http://127.0.0.1:5500/%E5%B0%8F%E5%B0%88%E9%A1%8C/%E8%B3%87%E7%94%A2%E7%AE%A1%E7%90%86%E7%B3%BB%E7%B5%B1/Bootstrap/record.html">+股票交易紀錄</a></button></h2>
+        <div class="row mt-4 mb-3">
+            <div class="col-12">
+                <button class="btn btn-success me-2" onclick="addStock('TW')">+ 新增台股</button>
+                <button class="btn btn-primary" onclick="addStock('US')">+ 新增美股</button>
+            </div>
+        </div>
+
+        <h4 class="mt-4">台股資產</h4>
+        <table class="table table-hover mt-2">
+            <thead class="table-dark"><tr><th>代號</th><th>股數</th><th>現價</th><th>總金額 (台幣)</th></tr></thead>
+            <tbody id="twStockBody">
+                <tr data-code="2330" data-shares="200"><td>2330</td><td>200</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+                <tr data-code="3037" data-shares="200"><td>3037</td><td>200</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+                <tr data-code="2308" data-shares="200"><td>2308</td><td>200</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+            </tbody>
+        </table>
+
+        <h4 class="mt-4">美股資產 (匯率: 1 USD = 31 TWD)</h4>
+        <table class="table table-hover mt-2">
+            <thead class="table-dark"><tr><th>代號</th><th>股數</th><th>現價</th><th>總金額 (美金)</th></tr></thead>
+            <tbody id="usStockBody">
+                <tr data-code="INTC" data-shares="50"><td>INTC</td><td>50</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+                <tr data-code="NBIS" data-shares="50"><td>NBIS</td><td>50</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+                <tr data-code="TXN" data-shares="50"><td>TXN</td><td>50</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+                <tr data-code="PLTR" data-shares="50"><td>PLTR</td><td>50</td><td class="price">讀取中...</td><td class="amount">-</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- ========================================== -->
+    <!-- 區塊 4：固定資產明細 -->
+    <!-- ========================================== -->
+    <div class="container section-container">
+        <h2 class="mb-4">固定資產小計: <span class="text-primary" id="fixedTotalDisplay">0</span></h2>
+        <div class="dropdown mb-4">
+            <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">+ 新增固定資產</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('fixed', '房子')">房子</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('fixed', '車子')">車子</a></li>
+                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="handleAssetCustom('fixed')">+ 自訂項目</a></li>
+            </ul>
+        </div>
+        <div id="fixed-list-container">
+            <div class="asset-item" data-name="房子" data-currency="TWD">
+                <div class="row"><div class="col-4">40坪廁所</div><div class="col-4"></div><div class="col-4 value-field">15000000</div></div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;"><div class="col-8"></div><div class="col-4">(台幣)</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 區塊 5：負債明細 -->
+    <!-- ========================================== -->
+    <div class="container section-container">
+        <h2 class="mb-4">負債小計: <span class="text-danger" id="liabilityTotalDisplay">0</span></h2>
+        <div class="dropdown mb-4">
+            <button class="btn btn-outline-danger dropdown-toggle" type="button" data-bs-toggle="dropdown">+ 新增負債項目</button>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('liability', '房屋貸款')">房屋貸款</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" onclick="handleAsset('liability', '信用卡費')">信用卡費</a></li>
+                <li><a class="dropdown-item text-danger" href="javascript:void(0)" onclick="handleAssetCustom('liability')">+ 自訂項目</a></li>
+            </ul>
+        </div>
+        <div id="liability-list-container">
+            <div class="asset-item" data-name="房屋貸款" data-currency="TWD">
+                <div class="row"><div class="col-4 text-danger">廁所貸款</div><div class="col-4"></div><div class="col-4 value-field text-danger">15000000</div></div>
+                <div class="row text-muted mb-3" style="font-size: 0.9rem;"><div class="col-8"></div><div class="col-4">(台幣)</div></div>
+            </div>
+        </div>
+    </div>
+
+   
+    <!-- ========================================== -->
+    <!-- JavaScript 核心邏輯區 -->
+    <!-- ========================================== -->
+    <script>
+        const USD_RATE = 31; // 全局美金匯率
+
+        // ==============================
+        // 核心：更新總淨資產 (現金 + 投資 + 固定資產 - 負債)
+        // ==============================
+        function updateNetWorth() {
+            let cash = parseInt(document.getElementById('cashAmount').innerText.replace(/,/g, '')) || 0;
+            let invest = parseInt(document.getElementById('investmentAmount').innerText.replace(/,/g, '')) || 0;
+            let fixed = parseInt(document.getElementById('fixedAssetAmount').innerText.replace(/,/g, '')) || 0;
+            let liability = parseInt(document.getElementById('liabilityAmount').innerText.replace(/,/g, '')) || 0;
+
+            let totalNet = cash + invest + fixed - liability;
+
+            let netWorthElement = document.getElementById('netWorth');
+            if (netWorthElement) {
+                netWorthElement.innerText = totalNet.toLocaleString();
+                // 若淨資產變為負數，字體改為紅色警告
+                if (totalNet < 0) {
+                    netWorthElement.classList.remove('text-success');
+                    netWorthElement.classList.add('text-danger');
+                } else {
+                    netWorthElement.classList.remove('text-danger');
+                    netWorthElement.classList.add('text-success');
+                }
+            }
+        }
+
+        // ==============================
+        // 模組一：通用資產/負債處理模組 (整合版)
+        // category 可傳入: 'cash' (流動資金), 'fixed' (固定資產), 'liability' (負債)
+        // ==============================
+        function handleAsset(category, itemName) {
+            let inputAmount = prompt(`請輸入「${itemName}」的金額：`);
+            if (inputAmount === null || inputAmount.trim() === "") return;
+
+            let amount = parseInt(inputAmount) || 0;
+            let container = document.getElementById(`${category}-list-container`);
+            let existingItem = container.querySelector(`.asset-item[data-name="${itemName}"]`);
+
+            if (existingItem) {
+                existingItem.querySelector('.value-field').innerText = amount;
+            } else {
+                // 判斷是否為美金
+                let isUSD = itemName.includes("美金") || itemName.includes("美幣");
+                let currencyAttr = isUSD ? 'USD' : 'TWD';
+                let currencyLabel = isUSD ? '(美金)' : '(台幣)';
+                
+                // 負債欄位特別標示紅色
+                let colorClass = category === 'liability' ? 'text-danger' : '';
+
+                let newItemHTML = `
+                    <div class="asset-item" data-name="${itemName}" data-currency="${currencyAttr}">
+                        <div class="row">
+                            <div class="col-4 ${colorClass}">${itemName}:</div>
+                            <div class="col-4"></div>
+                            <div class="col-4 value-field ${colorClass}">${amount}</div>
+                        </div>
+                        <div class="row text-muted mb-3" style="font-size: 0.9rem;">
+                            <div class="col-8"></div>
+                            <div class="col-4">${currencyLabel}</div>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', newItemHTML);
+            }
+            calculateCategoryTotal(category);
+        }
+
+        function handleAssetCustom(category) {
+            let customName = prompt("請輸入自訂項目的名稱：");
+            if (customName && customName.trim() !== "") {
+                handleAsset(category, customName.trim());
+            }
+        }
+
+        function calculateCategoryTotal(category) {
+            let total = 0;
+            let container = document.getElementById(`${category}-list-container`);
+            let items = container.querySelectorAll('.asset-item');
+            
+            items.forEach(function(item) {
+                let valueField = item.querySelector('.value-field');
+                let rawText = valueField.innerText.replace(/,/g, '');
+                let val = parseInt(rawText) || 0;
+                let currency = item.getAttribute('data-currency');
+
+                // 只有美金才乘匯率，其餘視為台幣直接加
+                if (currency === 'USD') {
+                    total += (val * USD_RATE);
+                } else {
+                    total += val;
+                }
+                valueField.innerText = val.toLocaleString();
+            });
+
+            // 1. 更新該區塊的小計 (例如: 流動資金小計)
+            let subtotalDisplay = document.getElementById(`${category}TotalDisplay`);
+            if (subtotalDisplay) subtotalDisplay.innerText = total.toLocaleString();
+
+            // 2. 更新最上方總覽對應的欄位
+            let summaryId = '';
+            if (category === 'cash') summaryId = 'cashAmount';
+            if (category === 'fixed') summaryId = 'fixedAssetAmount';
+            if (category === 'liability') summaryId = 'liabilityAmount';
+            
+            let summaryElement = document.getElementById(summaryId);
+            if (summaryElement) summaryElement.innerText = total.toLocaleString();
+
+            // 3. 任何變動都必須重新計算淨資產
+            updateNetWorth();
+        }
+
+        // ==============================
+        // 模組二：投資與股價抓取邏輯
+        // ==============================
+        function addStock(type) {
+            const typeName = type === 'TW' ? '台股' : '美股';
+            let code = prompt(`請輸入${typeName}代號 (例如: ${type === 'TW' ? '2454' : 'AAPL'}):`);
+            if (!code || code.trim() === "") return;
+            code = code.trim().toUpperCase();
+
+            let sharesInput = prompt(`請輸入「${code}」的持股股數:`);
+            if (!sharesInput || sharesInput.trim() === "") return;
+            let shares = parseInt(sharesInput) || 0;
+
+            const tbody = document.getElementById(type === 'TW' ? 'twStockBody' : 'usStockBody');
+            let existingRow = tbody.querySelector(`tr[data-code="${code}"]`);
+
+            if (existingRow) {
+                existingRow.setAttribute('data-shares', shares);
+                existingRow.querySelector('td:nth-child(2)').innerText = shares.toLocaleString();
+            } else {
+                const newRowHTML = `
+                  <tr data-code="${code}" data-shares="${shares}">
+                    <td>${code}</td><td>${shares}</td>
+                    <td class="price">讀取中...</td><td class="amount">-</td>
+                  </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', newRowHTML);
+            }
+            fetchAllStockPrices();
+        }
+
+        async function fetchStockPriceFromAPI(code, isTW) {
+            const symbol = isTW ? `${code}.TW` : code;
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1m&range=1d`;
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.chart.result[0].meta.regularMarketPrice;
+            } catch (error) {
+                console.error(`抓取 ${symbol} 失敗:`, error);
+                return null;
+            }
+        }
+
+        async function fetchAllStockPrices() {
+            for (let row of document.querySelectorAll('#twStockBody tr')) {
+                let priceElem = row.querySelector('.price');
+                if (priceElem.innerText === "讀取中..." || priceElem.innerText === "-") {
+                    let price = await fetchStockPriceFromAPI(row.getAttribute('data-code'), true);
+                    priceElem.innerText = price !== null ? price : "讀取失敗";
+                }
+            }
+            for (let row of document.querySelectorAll('#usStockBody tr')) {
+                let priceElem = row.querySelector('.price');
+                if (priceElem.innerText === "讀取中..." || priceElem.innerText === "-") {
+                    let price = await fetchStockPriceFromAPI(row.getAttribute('data-code'), false);
+                    priceElem.innerText = price !== null ? price : "讀取失敗";
+                }
+            }
+            calculateTotalInvestments();
+        }
+
+        function calculateTotalInvestments() {
+            let totalTWD = 0;
+
+            document.querySelectorAll('#twStockBody tr').forEach(row => {
+                let shares = parseInt(row.getAttribute('data-shares')) || 0;
+                let priceElem = row.querySelector('.price');
+                let price = parseFloat(priceElem.innerText.replace(/,/g, '')) || 0;
+                if (!price) { row.querySelector('.amount').innerText = "-"; return; }
+                
+                let amount = shares * price;
+                totalTWD += amount;
+                row.querySelector('.amount').innerText = amount.toLocaleString();
+                priceElem.innerText = price.toLocaleString();
+            });
+
+            document.querySelectorAll('#usStockBody tr').forEach(row => {
+                let shares = parseInt(row.getAttribute('data-shares')) || 0;
+                let priceElem = row.querySelector('.price');
+                let price = parseFloat(priceElem.innerText.replace(/,/g, '')) || 0;
+                if (!price) { row.querySelector('.amount').innerText = "-"; return; }
+                
+                let amountUSD = shares * price;
+                totalTWD += (amountUSD * USD_RATE);
+                row.querySelector('.amount').innerText = amountUSD.toLocaleString();
+                priceElem.innerText = price.toLocaleString();
+            });
+
+            document.getElementById('totalInvestment').innerText = '$ ' + totalTWD.toLocaleString();
+            document.getElementById('investmentAmount').innerText = totalTWD.toLocaleString();
+            
+            updateNetWorth();
+        }
+
+        // ==============================
+        // 初始化：網頁載入後自動執行所有計算
+        // ==============================
+        window.addEventListener('DOMContentLoaded', () => {
+            calculateCategoryTotal('cash');
+            calculateCategoryTotal('fixed');
+            calculateCategoryTotal('liability');
+            fetchAllStockPrices();
+        });
+    </script>
+</body>
+</html>
